@@ -1,0 +1,1 @@
+nohup python3 tf_cnn_benchmarks.py --model=resnet152 --data_dir=/home/ubuntu/data/imagenet/ --checkpoint_dir=/home/ubuntu/checkpoints/resnet152 --num_batches=9000000 --subset=train --learning_rate=0.1 --learning_rate_decay_factor=0.1 --num_epochs_per_decay=30 --optimizer=momentum --weight_decay=0.0001 --num_gpus=4 > logs/resnet152_train_gpus=4.log &
