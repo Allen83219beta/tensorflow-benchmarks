@@ -677,6 +677,7 @@ class BenchmarkCNN(object):
         image_producer.notify_image_consumption()
 
       start_time = time.time()
+      true_start_time = time.time()
       top_1_accuracy_sum = 0.0
       top_5_accuracy_sum = 0.0
       total_eval_count = self.num_batches * self.batch_size
@@ -704,6 +705,7 @@ class BenchmarkCNN(object):
       summary_writer.add_summary(summary, global_step)
       log_fn('Precision @ 1 = %.4f, Recall @ 5 = %.4f, Global step = %d [%d examples]' %
              (precision_at_1, recall_at_5, global_step, total_eval_count))
+      log_fn('Time for inference: %.4f' % (time.time() - true_start_time))
 
   def _benchmark_cnn(self):
     """Run cnn in benchmark mode. When forward_only on, it forwards CNN."""
@@ -905,6 +907,7 @@ class BenchmarkCNN(object):
         # Wait for other workers to reach the end, so this worker doesn't
         # go away underneath them.
         sess.run([execution_barrier])
+
     f.close()
     sv.stop()
 

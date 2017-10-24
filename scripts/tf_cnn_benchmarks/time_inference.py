@@ -3,17 +3,13 @@ import os
 import subprocess
 import sys
 
-def main(checkpoint_path, model, use_bottleneck, num_trials):
+def main(checkpoint_path, model, num_trials):
   print("Number of images\tInference time")
   num_trials = 1000
-  for batch_size in [1, 2, 4, 8, 16, 32, 64, 128, 2048, 4096, 8192]:
-    command = ("python3 resnet/resnet_main.py --mode=eval --eval_data_path=cifar10/test_batch.bin "
-               "--eval_dir=data/%(model)s/log_root/eval --dataset='cifar10' --model=%(model)s "
-               "--use_bottleneck=%(use_bottleneck)s --eval_batch_count=%(num_trials)d --eval_once=True --num_gpus=1 "
-               "--data_format=NHWC --time_inference=True --batch_size=%(batch_size)d" %
-               {"model": model, "use_bottleneck": "True" if use_bottleneck else "False", "batch_size": batch_size,
-                "num_trials": num_trials})
-    full_command = command + " --log_root=%s 2>/dev/null" % checkpoint_path
+  for batch_size in [2048, 4096, 8192]:
+    command = ("python tf_cnn_benchmarks.py --model=%(model)s --eval --data_dir=/lfs/1/deepak/data/imagenet/ --eval_subset=validation --num_batches=%(num_trials)d --batch_size=%(batch_size)d" %
+               {"model": model, "batch_size": batch_size, "num_trials": num_trials})
+    full_command = command + " --checkpoint_dir=%s 2>/dev/null" % checkpoint_path
     try:
       output = subprocess.check_output(full_command, shell=True)
       output = output.decode('utf8').strip()
@@ -21,7 +17,6 @@ def main(checkpoint_path, model, use_bottleneck, num_trials):
         if "Time for inference" in line:
           line = line.strip()
           inference_time = float(line.split(": ")[1])
-          print(inference_time, num_trials)
           inference_time = inference_time / num_trials
           stats = [batch_size, inference_time]
           print("\t".join([str(stat) for stat in stats]))
@@ -40,9 +35,7 @@ if __name__ == '__main__':
                       help="Path to dumped model checkpoints")
   parser.add_argument('-m', "--model", type=str, required=True,
                       help="Model name")
-  parser.add_argument('-b', "--use_bottleneck", type=bool, default=False,
-                      help="Use bottleneck")
-  parser.add_argument('-n', "--num_trials", type=int, default=1000,
+  parser.add_argument('-n', "--num_trials", type=int, default=100,
                       help="Number of trials")
 
   cmdline_args = parser.parse_args()
@@ -50,7 +43,6 @@ if __name__ == '__main__':
 
   checkpoint_path = opt_dict["checkpoint_path"]
   model = opt_dict["model"]
-  use_bottleneck = opt_dict["use_bottleneck"]
   num_trials = opt_dict["num_trials"]
 
-  main(checkpoint_path, model, use_bottleneck, num_trials)
+  main(checkpoint_path, model, num_trials)
