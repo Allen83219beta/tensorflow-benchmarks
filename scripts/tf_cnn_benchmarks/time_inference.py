@@ -6,8 +6,8 @@ import sys
 def main(checkpoint_path, model, num_trials):
   print("Number of images\tInference time")
   num_trials = 1000
-  for batch_size in [2048, 4096, 8192]:
-    command = ("python tf_cnn_benchmarks.py --model=%(model)s --eval --data_dir=/lfs/1/deepak/data/imagenet/ --eval_subset=validation --num_batches=%(num_trials)d --batch_size=%(batch_size)d" %
+  for batch_size in [1]:
+    command = ("python3 tf_cnn_benchmarks.py --model=%(model)s --eval --data_dir=/home/ubuntu/imagenet --eval_subset=validation --num_batches=%(num_trials)d --batch_size=%(batch_size)d" %
                {"model": model, "batch_size": batch_size, "num_trials": num_trials})
     full_command = command + " --checkpoint_dir=%s 2>/dev/null" % checkpoint_path
     try:
@@ -35,7 +35,7 @@ if __name__ == '__main__':
                       help="Path to dumped model checkpoints")
   parser.add_argument('-m', "--model", type=str, required=True,
                       help="Model name")
-  parser.add_argument('-n', "--num_trials", type=int, default=100,
+  parser.add_argument('-n', "--num_trials", type=int, default=1000,
                       help="Number of trials")
 
   cmdline_args = parser.parse_args()
